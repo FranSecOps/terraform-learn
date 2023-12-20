@@ -1,13 +1,16 @@
-provider "aws" {}
+provider "aws" {
+    region = "us-east-1"
+}
 
 variable "vpc_cidr_block" {}
 variable "subnet_cidr_block" {}
 variable "avail_zone" {}
+variable "env_prefix" {}
 
 resource "aws_vpc" "myapp-vpc" {
     cidr_block = var.vpc_cidr_block
     tags = {
-      Name = "myapp_vpc"
+      Name = "${var.env_prefix}-vpc"
     }
   }
 
@@ -16,6 +19,19 @@ resource "aws_subnet" "myapp-subnet" {
     cidr_block = var.subnet_cidr_block
     availability_zone = var.avail_zone
     tags = {
-        Name = "myapp_subnet"
+        Name = "${var.env_prefix}-subnet-1"
     }
+}
+
+resource "aws_route_table" "myapp-rtb" {
+    vpc_id = aws_vpc.myapp-vpc.id
+
+    route = {
+        cidr_block = "0.0.0.0/0"
+        gateway_id = aws_internet_gateway.myapp-igw.id
+    }
+}
+
+resource "aws_internet_gateway" "myapp-igw" {
+    vpc_id = aws_vpc.myapp-vpc.id
 }
