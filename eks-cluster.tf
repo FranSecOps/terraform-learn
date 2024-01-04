@@ -21,22 +21,37 @@ module "eks"{
 
   subnet_ids = module.myapp-vpc.private_subnets
   vpc_id = module.myapp-vpc.vpc_id
+  cluster_endpoint_public_access = true
 
   tags = {
     environment = "development"
     application = "myapp"
   }
 
-  self_managed_node_groups = [
-    {
-        instance_type = "t2.small"
-        name = "worker-group-1"
-        desired_size = 2
-    },
-    {
-        instance_type = "t2.medium"
-        name = "worker-group-2"
-        desired_size = 1
+
+  eks_managed_node_group_defaults = {
+    ami_type = "AL2_x86_64"
+  }
+
+  eks_managed_node_groups = {
+    one = {
+      name = "node-group-1"
+
+      instance_types = ["t3.small"]
+
+      min_size     = 1
+      max_size     = 3
+      desired_size = 2
     }
-]
+
+    two = {
+      name = "node-group-2"
+
+      instance_types = ["t3.small"]
+
+      min_size     = 1
+      max_size     = 2
+      desired_size = 1
+    }
+  }
 }
